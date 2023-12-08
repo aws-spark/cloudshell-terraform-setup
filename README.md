@@ -1,11 +1,10 @@
-Clone this repo to your AWS cloudshell and execute the script.
+Requirements:
 
-It will install tfenv and latest terraform, and an alias for tf and a folder called tf.
-
-Four base files are built with latest aws provider for terraform to use.
-
-The initialisation of terraform will also create the state files locally to cloudshell.
-
-What is left to do is to create your resource .tf files, plan and apply.
-
+An AWS account with access to use cloudshell:
 https://aws.amazon.com/cloudshell/
+
+Connect to your AWS account and start cloudshell
+
+Run this from the cloudshell terminal to setup and initialise terraform:
+
+curl -sSL https://raw.githubusercontent.com/aws-spark/cloudshell-terraform-setup/main/cloudshell-tf.sh -o $HOME/cloudshell-tf.sh; chmod +x $HOME/cloudshell-tf.sh; bash $HOME/cloudshell-tf.sh
