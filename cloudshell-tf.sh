@@ -59,17 +59,21 @@ variable "aws_region" {
 EOT
 
 echo "Initial terraform files needed are created below:"
+echo ""
 echo "providers.tf"
 cat providers.tf
+echo ""
 echo "terraform.tf"
 cat terraform.tf
+echo ""
 echo "terraform.tfvars"
 cat terraform.tfvars
+echo ""
 echo "variables.tf"
 cat variables.tf
-
+echo ""
 # Start the terraform initialisation, local state file setup etc
-tf init
-
+terraform init
+echo ""
 echo "Terraform setup and ready"
 echo "Create your resource files with .tf and plan and apply"
