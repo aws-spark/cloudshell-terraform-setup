@@ -18,6 +18,7 @@ echo "alias tf='terraform'" >> ~/.bashrc
 source ~/.bashrc
 # Build a tf folder to house terraform files and load the basic files required
 mkdir ~/tf && cd ~/tf
+pwd
 
 cat <<EOT >> providers.tf
 provider "aws" {
@@ -73,6 +74,7 @@ echo "variables.tf"
 cat variables.tf
 echo ""
 # Start the terraform initialisation, local state file setup etc
+cd ~/tf
 terraform init
 echo ""
 echo "Terraform setup and ready"
