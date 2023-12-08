@@ -14,8 +14,8 @@ tfenv use $latest
 terraform --version
 
 # Set alias for terraform to tf
-echo "alias tf='terraform'" >> .bashrc 
-source .bashrc
+echo "alias tf='terraform'" >> ~/.bashrc 
+source ~/.bashrc
 # Build a tf folder to house terraform files and load the basic files required
 mkdir ~/tf && cd ~/tf
 
