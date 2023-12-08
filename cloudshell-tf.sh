@@ -1,5 +1,6 @@
 #!/bin/bash
 # Setup AWS Cloudshell to use terraform from tf folder.
+# This file is intended to help get going with terraform in your AWS account using cloudshell.
 
 aws_account_id="$(aws sts get-caller-identity --query Account)"
 aws_tf_module="$(curl -Ls https://github.com/hashicorp/terraform-provider-aws/releases/latest | grep "<title>Release" | awk '{ print $2}' | awk '{gsub(/v/,"")}; 1')"
@@ -78,4 +79,4 @@ cd ~/tf
 terraform init
 echo ""
 echo "Terraform setup and ready"
-echo "Create your resource files with .tf and plan and apply"
+echo "Create your resource files in  ~/tf/<filename>.tf then run 'tf plan' and 'tf apply'"
