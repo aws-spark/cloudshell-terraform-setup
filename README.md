@@ -18,8 +18,10 @@ Once you have your new .tf files ready to test:
 Try "tf plan" and then "tf apply" - you are building with Infrastructure as Code now.
 
 To undo what this script does - or to run it again to update, from within cloudshell these commands will delete things, so use with caution:
-```rm -rf ~/.tfenv
+```
+rm -rf ~/.tfenv
 rm -rf ~/bin
 rm ~/cloudshell-tf.sh
 rm -rf ~/tf
-sed -i '$d' ~/.bashrc```
+sed -i '$d' ~/.bashrc
+```
