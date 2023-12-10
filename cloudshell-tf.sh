@@ -7,6 +7,7 @@ aws_region="$(aws ec2 describe-availability-zones --output text --query 'Availab
 aws_tf_module="$(curl -Ls https://github.com/hashicorp/terraform-provider-aws/releases/latest | grep "<title>Release" | awk '{ print $2}' | awk '{gsub(/v/,"")}; 1')"
 latest="$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')"
 
+cd
 # Install tfenv to manage terraform installs
 git clone https://github.com/tfutils/tfenv.git ~/.tfenv
 mkdir ~/bin
