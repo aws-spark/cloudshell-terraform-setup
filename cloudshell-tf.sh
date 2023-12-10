@@ -46,7 +46,7 @@ EOT
 
 cat <<EOT >> terraform.tfvars
 aws_account_id       = ${aws_account_id} 
-aws_region           = ${aws_region}
+aws_region           = "${aws_region}"
 EOT
 
 cat <<EOT >> variables.tf
