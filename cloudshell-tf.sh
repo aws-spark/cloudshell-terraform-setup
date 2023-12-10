@@ -76,7 +76,6 @@ echo "variables.tf"
 cat variables.tf
 echo ""
 # Start the terraform initialisation, local state file setup etc
-cd ~/tf
 terraform init
 echo ""
 echo "Terraform setup and ready"
