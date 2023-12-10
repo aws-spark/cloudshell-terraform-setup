@@ -19,9 +19,7 @@ Try "tf plan" and then "tf apply" - you are building with Infrastructure as Code
 
 To undo what this script does - or to run it again to update, from within cloudshell these commands will delete things, so use with caution:
 ```
-rm -rf ~/.tfenv
-rm -rf ~/bin
+rm -rf ~/.tfenv ~/bin ~/tf
 rm ~/cloudshell-tf.sh
-rm -rf ~/tf
 sed -i '$d' ~/.bashrc
 ```
