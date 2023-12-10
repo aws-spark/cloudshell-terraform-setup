@@ -3,6 +3,7 @@
 # This file is intended to help get going with terraform in your AWS account using cloudshell.
 
 aws_account_id="$(aws sts get-caller-identity --query Account)"
+aws_region="$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')"
 aws_tf_module="$(curl -Ls https://github.com/hashicorp/terraform-provider-aws/releases/latest | grep "<title>Release" | awk '{ print $2}' | awk '{gsub(/v/,"")}; 1')"
 latest="$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')"
 
@@ -45,7 +46,7 @@ EOT
 
 cat <<EOT >> terraform.tfvars
 aws_account_id       = ${aws_account_id} 
-aws_region           = "ap-southeast-2"
+aws_region           = ${aws_region}
 EOT
 
 cat <<EOT >> variables.tf
