@@ -4,6 +4,7 @@
 
 aws_account_id="$(aws sts get-caller-identity --query Account)"
 aws_region="$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')"
+# If something fails with the script is most likely one of these below requiring checking:
 aws_tf_module="$(curl -Ls https://github.com/hashicorp/terraform-provider-aws/releases/latest | grep "<title>Release" | awk '{ print $2}' | awk '{gsub(/v/,"")}; 1')"
 latest="$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')"
 
