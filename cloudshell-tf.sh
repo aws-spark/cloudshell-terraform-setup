@@ -1,10 +1,11 @@
 #!/bin/bash
 # setup_terraform.sh
 
-echo "Discovering environment..."
+# 1. Environment Discovery
+echo "Checking environment..."
 account_id=$(aws sts get-caller-identity --query Account --output text)
 
-# Metadata trick to get region without an API call
+# Metadata URI check for region
 if [ -n "$AWS_REGION" ]; then
     region=$AWS_REGION
 elif [ -n "$AWS_CONTAINER_CREDENTIALS_FULL_URI" ]; then
@@ -13,35 +14,37 @@ else
     region=$(aws configure get region)
 fi
 
-# Hardcoded fallback if discovery fails (change this to your preferred region)
-region=${region:-ap-southeast-6} 
+region=${region:-ap-southeast-2}
+echo "Context: $account_id in $region"
 
-echo "Account: $account_id"
-echo "Region:  $region"
+# 2. Latest Versions Discovery
+echo "Fetching latest version metadata..."
+# Get latest Terraform Core version
+tf_latest=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r '.current_version')
 
-# Setup tfenv
+# Get latest AWS Provider version from official HashiCorp API
+aws_p_latest=$(curl -s https://api.releases.hashicorp.com/v1/releases/terraform-provider-aws | jq -r '.[0].version')
+
+echo "Latest Terraform: $tf_latest"
+echo "Latest AWS Provider: $aws_p_latest"
+
+# 3. Setup tfenv
 if [ ! -d "$HOME/.tfenv" ]; then
     echo "Installing tfenv..."
     git clone --depth=1 https://github.com/tfutils/tfenv.git ~/.tfenv
     mkdir -p ~/bin
     ln -s ~/.tfenv/bin/* ~/bin/
-    
-    # Apply to CURRENT session immediately
     export PATH="$HOME/bin:$PATH"
-    # Persist for FUTURE sessions
     echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
 else
-    echo "tfenv already installed."
     export PATH="$HOME/bin:$PATH"
 fi
 
-# Install Terraform
-echo "Setting up terraform..."
-tfenv install latest
-tfenv use latest
-tf_ver=$(terraform --version | head -n1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+# 4. Install Terraform
+tfenv install "$tf_latest"
+tfenv use "$tf_latest"
 
-# Create Workspace
+# 5. Build Workspace Files
 mkdir -p ~/tf && cd ~/tf
 
 cat <<EOF > providers.tf
@@ -53,11 +56,12 @@ EOF
 
 cat <<EOF > terraform.tf
 terraform {
-  required_version = ">= ${tf_ver}"
+  required_version = ">= ${tf_latest}"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "${aws_p_latest}"
     }
   }
 }
@@ -73,17 +77,17 @@ aws_account_id = "$account_id"
 aws_region     = "$region"
 EOF
 
-# Setup 'tf' alias for CURRENT session
+# 6. Session Persistence
 alias tf='terraform'
-
-# Persist 'tf' alias for FUTURE sessions
 if ! grep -q "alias tf=" ~/.bashrc; then
     echo "alias tf='terraform'" >> ~/.bashrc
 fi
 
+# 7. Initialization
 echo "------------------------------------------------"
-echo "Setup finished."
-echo "Terraform version: $tf_ver"
-echo "Region set to: $region"
+echo "Initializing Terraform in $(pwd)..."
+terraform init
+
 echo ""
-echo "NOTE: The 'tf' alias is ready. Run: tf init"
+echo "Setup Complete."
+echo "You are now in ~/tf and ready to build."
