@@ -5,7 +5,6 @@
 echo "Checking environment..."
 account_id=$(aws sts get-caller-identity --query Account --output text)
 
-# Metadata URI check for region
 if [ -n "$AWS_REGION" ]; then
     region=$AWS_REGION
 elif [ -n "$AWS_CONTAINER_CREDENTIALS_FULL_URI" ]; then
@@ -19,10 +18,7 @@ echo "Context: $account_id in $region"
 
 # 2. Latest Versions Discovery
 echo "Fetching latest version metadata..."
-# Get latest Terraform Core version
 tf_latest=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r '.current_version')
-
-# Get latest AWS Provider version from official HashiCorp API
 aws_p_latest=$(curl -s https://api.releases.hashicorp.com/v1/releases/terraform-provider-aws | jq -r '.[0].version')
 
 echo "Latest Terraform: $tf_latest"
@@ -78,18 +74,20 @@ aws_region     = "$region"
 EOF
 
 # 6. Session Persistence
+# This alias will now work in the parent shell because you are sourcing the script
 alias tf='terraform'
 if ! grep -q "alias tf=" ~/.bashrc; then
     echo "alias tf='terraform'" >> ~/.bashrc
 fi
-
-cd ~/tf
 
 # 7. Initialization
 echo "------------------------------------------------"
 echo "Initializing Terraform in $(pwd)..."
 terraform init
 
+# Crucial: Jump to the directory one last time
+cd ~/tf
+
 echo ""
 echo "Setup Complete."
-echo "You are now in ~/tf and ready to build."
+echo "Try tf init, and add some resources, tf plan, tf apply etc."
