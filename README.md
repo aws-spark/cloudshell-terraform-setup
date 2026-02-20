@@ -11,7 +11,7 @@ Connect to your AWS account and start cloudshell
 
 Run this from the cloudshell terminal to setup and initialise terraform:
 
-```curl -sSL https://raw.githubusercontent.com/aws-spark/cloudshell-terraform-setup/main/cloudshell-tf.sh -o $HOME/cloudshell-tf.sh; chmod +x $HOME/cloudshell-tf.sh; bash $HOME/cloudshell-tf.sh```
+```curl -sSL https://raw.githubusercontent.com/aws-spark/cloudshell-terraform-setup/main/cloudshell-tf.sh -o $HOME/cloudshell-tf.sh && . $HOME/cloudshell-tf.sh```
 
 Start building your .tf files in ~/tf folder. There's a ton of resources out there to guide you on what you want built, eg: https://registry.terraform.io/providers/hashicorp/aws/latest/docs - review the services on the left for documentation on how to get started. For example: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket - to build a s3 bucket.
 Once you have your new .tf files ready to test:
