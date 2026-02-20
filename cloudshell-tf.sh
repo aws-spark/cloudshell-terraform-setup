@@ -83,6 +83,8 @@ if ! grep -q "alias tf=" ~/.bashrc; then
     echo "alias tf='terraform'" >> ~/.bashrc
 fi
 
+cd ~/tf
+
 # 7. Initialization
 echo "------------------------------------------------"
 echo "Initializing Terraform in $(pwd)..."
