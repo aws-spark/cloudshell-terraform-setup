@@ -1,84 +1,83 @@
 #!/bin/bash
-# Setup AWS Cloudshell to use terraform from tf folder.
-# This file is intended to help get going with terraform in your AWS account using cloudshell.
+# setup_terraform.sh - Configures CloudShell with tfenv and base providers
 
-aws_account_id="$(aws sts get-caller-identity --query Account)"
-aws_region="$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')"
-# If something fails with the script is most likely one of these below requiring checking:
-aws_tf_module="$(curl -Ls https://github.com/hashicorp/terraform-provider-aws/releases/latest | grep "<title>Release" | awk '{ print $2}' | awk '{gsub(/v/,"")}; 1')"
-latest="$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')"
+# Get session context
+echo "Checking environment..."
+account_id=$(aws sts get-caller-identity --query Account --output text)
 
-cd
-# Install tfenv to manage terraform installs
-git clone https://github.com/tfutils/tfenv.git ~/.tfenv
-mkdir ~/bin
-ln -s ~/.tfenv/bin/* ~/bin/
-tfenv install
-tfenv use $latest
-terraform --version
+# Use CloudShell's native region env var
+region=${AWS_REGION:-$(aws configure get region)}
+region=${region:-us-east-1}
 
-# Set alias for terraform to tf
-echo "alias tf='terraform'" >> ~/.bashrc 
-source ~/.bashrc
-# Build a tf folder to house terraform files and load the basic files required
-mkdir ~/tf && cd ~/tf
-pwd
+echo "Context: $account_id in $region"
 
-cat <<EOT >> providers.tf
+# Setup tfenv if not already present
+if [ ! -d "$HOME/.tfenv" ]; then
+    echo "Installing tfenv..."
+    git clone --depth=1 https://github.com/tfutils/tfenv.git ~/.tfenv
+    mkdir -p ~/bin
+    ln -s ~/.tfenv/bin/* ~/bin/
+    
+    # Update PATH for immediate use and future sessions
+    export PATH="$HOME/bin:$PATH"
+    echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
+else
+    echo "tfenv is already in ~/.tfenv"
+fi
+
+# Manage terraform versions
+echo "Fetching latest terraform..."
+tfenv install latest
+tfenv use latest
+tf_version=$(terraform --version | head -n1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+
+# Initialize working directory
+mkdir -p ~/tf && cd ~/tf
+
+# Generate boilerplate hcl
+cat <<EOF > providers.tf
 provider "aws" {
   region              = var.aws_region
   allowed_account_ids = [var.aws_account_id]
 }
-EOT
+EOF
 
-cat <<EOT >> terraform.tf
+cat <<EOF > terraform.tf
 terraform {
+  required_version = ">= ${tf_version}"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= ${aws_tf_module}"
+      version = "~> 5.0"
     }
   }
-
-  required_version = ">= ${latest}"
-
 }
-EOT
+EOF
 
-cat <<EOT >> terraform.tfvars
-aws_account_id       = ${aws_account_id} 
-aws_region           = "${aws_region}"
-EOT
-
-cat <<EOT >> variables.tf
+cat <<EOF > variables.tf
 variable "aws_account_id" {
   type        = string
-  description = "Allowed AWS account ID where resources can be created"
+  description = "Target AWS Account ID"
 }
 
 variable "aws_region" {
   type        = string
-  description = "AWS Region where resources will be created"
+  description = "Target AWS Region"
 }
-EOT
+EOF
 
-echo "Initial terraform files needed are created below:"
-echo ""
-echo "providers.tf"
-cat providers.tf
-echo ""
-echo "terraform.tf"
-cat terraform.tf
-echo ""
-echo "terraform.tfvars"
-cat terraform.tfvars
-echo ""
-echo "variables.tf"
-cat variables.tf
-echo ""
-# Start the terraform initialisation, local state file setup etc
-terraform init
-echo ""
-echo "Terraform setup and ready"
-echo "Create your resource files in  ~/tf/<filename>.tf then run 'tf plan' and 'tf apply'"
+cat <<EOF > terraform.tfvars
+aws_account_id = "$account_id"
+aws_region     = "$region"
+EOF
+
+# Add shorthand alias
+if ! grep -q "alias tf=" ~/.bashrc; then
+    echo "alias tf='terraform'" >> ~/.bashrc
+fi
+
+echo "------------------------------------------------"
+echo "Setup finished. Directory: ~/tf"
+echo "Terraform version: $tf_version"
+echo "Run 'tf init' to begin."
